@@ -1,6 +1,11 @@
 abstract public class ChessPiece {
 
-    private String color;
+    // Methods getColor() and getSymbol() can be defined in this class.
+    // But first, I'll do the course
+    // Можно добавить проверку на тот же ход. А лучше наверное ChessBoard
+    public String color;
+
+    // I'd rename as isFirstMove
     public boolean check = true;
 
 //    public String getColor() {
