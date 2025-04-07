@@ -77,6 +77,10 @@ public class Main {
                         if (board.moveToPosition(line, column, toLine, toColumn)) {
                             System.out.println("Успешно передвинулись");
                             board.printBoard();
+                            if (board.isWin != null) {
+                                System.out.println("Мат! Победили " + board.isWin);
+                                break;
+                            }
                         } else System.out.println("Передвижение не удалось");
                     } catch (Exception e) {
                         System.out.println("Вы что-то ввели не так, попробуйте ещё раз");

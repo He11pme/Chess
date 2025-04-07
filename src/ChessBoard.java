@@ -4,6 +4,7 @@ public class ChessBoard {
 
     public ChessPiece[][] board = new ChessPiece[8][8];
     private String nowPlayer;
+    public String isWin;
 
     public ChessBoard(String nowPlayer) {
         this.nowPlayer = nowPlayer;
@@ -20,6 +21,7 @@ public class ChessBoard {
             if(!nowPlayer.equals(board[startLine][startColumn].getColor())) return false;
 
             if(board[startLine][startColumn].canMoveToPosition(this, startLine, startColumn, endLine, endColumn)) {
+                if (board[endLine][endColumn] != null && board[endLine][endColumn].getSymbol().contains("K")) isWin = nowPlayer;
                 board[endLine][endColumn] = board[startLine][startColumn];
 
                 //If a pawn reaches the other border of the playing field, it turns into a queen
@@ -118,7 +120,7 @@ public class ChessBoard {
             for (int j = 0; j < 8; j++) {
                 if(board[i][j] == null) continue;
 
-                if(board[i][j].getSymbol().equals("K")) {
+                if(board[i][j].getSymbol().contains("K")) {
                     ((King) board[i][j]).isUnderAttack(this, i, j);
                 }
             }
