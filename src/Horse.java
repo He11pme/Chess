@@ -21,6 +21,13 @@ public class Horse extends ChessPiece {
         //Проверка находится ли конечная точка хода на доске
         if (!(range(toLine) && range(toColumn))) return false;
 
+        //Если цвет фигур совпадают, то хода нет
+        if (chessBoard.board[toLine][toColumn] != null) {
+            if (chessBoard.board[toLine][toColumn].getColor().equals(getColor())) {
+                return false;
+            }
+        }
+
         //Относительные координаты от начальной точки хода
         int relativeLine = Math.abs(toLine - line);
         int relativeColumn = Math.abs(toColumn - column);
