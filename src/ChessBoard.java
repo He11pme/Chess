@@ -3,25 +3,26 @@ public class ChessBoard {
     final String BLACK_PLAYER = "Black";
 
     public ChessPiece[][] board = new ChessPiece[8][8];
-    String nowPlayer;
+    private String nowPlayer;
 
     public ChessBoard(String nowPlayer) {
         this.nowPlayer = nowPlayer;
     }
 
     public String nowPlayerColor() {
-        return this.nowPlayer;
+        return nowPlayer;
     }
 
     public boolean moveToPosition(int startLine, int startColumn, int endLine, int endColumn) {
-        if (checkPos(startLine) && checkPos(startColumn)) {
+        if (checkPos(startLine) && checkPos(startColumn) && checkPos(endLine) && checkPos(endColumn)) {
 
-            //Цвет фигуры не совпадает с текущим игроком
+            // The color of the selected piece does not match the current player
             if(!nowPlayer.equals(board[startLine][startColumn].getColor())) return false;
+
             if(board[startLine][startColumn].canMoveToPosition(this, startLine, startColumn, endLine, endColumn)) {
                 board[endLine][endColumn] = board[startLine][startColumn];
 
-                //Если пешка добралась до другой границы превратить в ферзя
+                //If a pawn reaches the other border of the playing field, it turns into a queen
                 if(board[endLine][endColumn].getSymbol().equals("P")) {
                     int lineTurned = board[endLine][endColumn].getColor().equals(WHITE_PLAYER) ? 7 : 0;
                     if (endLine == lineTurned) {
@@ -32,24 +33,12 @@ public class ChessBoard {
                 board[endLine][endColumn].isFirstMove = false;
                 board[startLine][startColumn] = null;
 
+                nowPlayer = nowPlayerColor().equals(WHITE_PLAYER) ? BLACK_PLAYER : WHITE_PLAYER;
 
-
-                this.nowPlayer = this.nowPlayerColor().equals(WHITE_PLAYER) ? BLACK_PLAYER : WHITE_PLAYER;
-
-                //Проверка на шах
-                for(int i = 0; i < 8; i++) {
-                    for (int j = 0; j < 8; j++) {
-                        if(board[i][j] == null) continue;
-//                        if(board[i][j].getSymbol().equals("K") && board[i][j].getColor().equals(nowPlayerColor())) {
-//                            ((King) board[i][j]).isUnderAttack(this, i, j);
-//                        }
-                        if(board[i][j].getSymbol().equals("K")) {
-                            ((King) board[i][j]).isUnderAttack(this, i, j);
-                        }
-                    }
-                }
+                isCheck();  //Checkamte check
 
                 return true;
+
             } else return false;
 
         } else return false;
@@ -60,21 +49,25 @@ public class ChessBoard {
         System.out.println();
         System.out.println("Player 2(Black)");
         System.out.println();
-        System.out.println("\t0\t1\t2\t3\t4\t5\t6\t7");
+        System.out.println(" \t  \u001B[33mA   B   C   D   E   F   G   H\u001B[0m");
+        System.out.println();
 
         for (int i = 7; i > -1; i--) {
-            System.out.print(i + "\t");
+            System.out.print("\u001B[33m" + (i + 1) + "\t \u001B[0m");
             for (int j = 0; j < 8; j++) {
                 if(board[i][j] == null) {
-                    System.out.print(".." + "\t");
+                    System.out.print("[ ] ");
                 } else {
-                    System.out.print(board[i][j].getSymbol() + board[i][j].getColor().substring(0, 1).toLowerCase() + "\t");
+                    System.out.print(" " + board[i][j].getSymbol() + "  ");
                 }
             }
+            System.out.print("\u001B[33m \t" + (i + 1) + "\u001B[0m");
             System.out.println();
             System.out.println();
         }
 
+        System.out.println(" \t  \u001B[33mA   B   C   D   E   F   G   H\u001B[0m");
+        System.out.println();
         System.out.println("Player 1(White)");
     }
 
@@ -82,25 +75,36 @@ public class ChessBoard {
         return pos >= 0 && pos <= 7;
     }
 
-    public boolean castling0() {
+    /**
+     * The parameter column can only be 0 or 7.
+     * This number indicates on which side castling will be performed
+     * */
+    public boolean castling(int column) {
         int lineKing = this.nowPlayerColor().equals(WHITE_PLAYER) ? 0 : 7;
-        if(board[lineKing][0] == null || board[lineKing][4] == null) return false;
+        if(board[lineKing][column] == null || board[lineKing][4] == null) return false;
+
         //Проверка, что между королем и ладьей никого нет
-        for(int i = 1; i <= 3; i++) {
+        int start = column == 0 ? 1 : 5;
+        int end = column == 0 ? 3 : 6;
+        for(int i = start; i <= end; i++) {
             if(board[lineKing][i] != null) return false;
         }
-        if (board[lineKing][0].getSymbol().equals("R") &&
-            board[lineKing][4].getSymbol().equals("K") &&
-            board[lineKing][0].isFirstMove && board[lineKing][4].isFirstMove && !new King(WHITE_PLAYER).isUnderAttack(this, lineKing, 2)) {
+
+        int endPosKing = column == 0 ? 2 : 6;
+        int endPosRook = column == 0 ? 3 : 5;
+        //Заменил equals на contains, потому что добавил цвет фигур
+        if (board[lineKing][column].getSymbol().contains("R") &&
+                board[lineKing][4].getSymbol().contains("K") &&
+                board[lineKing][column].isFirstMove && board[lineKing][4].isFirstMove && !new King(WHITE_PLAYER).isUnderAttack(this, lineKing, endPosKing)) {
 
             // Move King
-            board[lineKing][2] = board[lineKing][4];
-            board[lineKing][2].isFirstMove = false;
+            board[lineKing][endPosKing] = board[lineKing][4];
+            board[lineKing][endPosKing].isFirstMove = false;
             board[lineKing][4] = null;
 
             // Move Rook
-            board[lineKing][3] = board[lineKing][0];
-            board[lineKing][3].isFirstMove = false;
+            board[lineKing][endPosRook] = board[lineKing][0];
+            board[lineKing][endPosRook].isFirstMove = false;
             board[lineKing][0] = null;
 
             this.nowPlayer = this.nowPlayerColor().equals(WHITE_PLAYER) ? BLACK_PLAYER : WHITE_PLAYER;
@@ -108,30 +112,17 @@ public class ChessBoard {
         } else return false;
     }
 
-    public boolean castling7() {
-        int lineKing = this.nowPlayerColor().equals(WHITE_PLAYER) ? 0 : 7;
-        if(board[lineKing][7] == null || board[lineKing][4] == null) return false;
-        //Проверка, что между королем и ладьей никого нет
-        for(int i = 5; i <= 6; i++) {
-            if(board[lineKing][i] != null) return false;
+    // Метод проверяет, поставили ли данным ходом любому из королей шах
+    private void isCheck() {
+        for(int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if(board[i][j] == null) continue;
+
+                if(board[i][j].getSymbol().equals("K")) {
+                    ((King) board[i][j]).isUnderAttack(this, i, j);
+                }
+            }
         }
-        if (board[lineKing][7].getSymbol().equals("R") &&
-                board[lineKing][4].getSymbol().equals("K") &&
-                board[lineKing][7].isFirstMove && board[lineKing][4].isFirstMove && !new King(WHITE_PLAYER).isUnderAttack(this, lineKing, 6)) {
-
-            // Move King
-            board[lineKing][6] = board[lineKing][4];
-            board[lineKing][6].isFirstMove = false;
-            board[lineKing][4] = null;
-
-            // Move Rook
-            board[lineKing][5] = board[lineKing][7];
-            board[lineKing][5].isFirstMove = false;
-            board[lineKing][7] = null;
-
-            this.nowPlayer = this.nowPlayerColor().equals(WHITE_PLAYER) ? BLACK_PLAYER : WHITE_PLAYER;
-            return true;
-        } else return false;
     }
 
 }

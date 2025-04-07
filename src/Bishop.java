@@ -1,25 +1,13 @@
 public class Bishop extends ChessPiece {
 
     public Bishop(String color) {
-        super(color);
-    }
-
-    @Override
-    public String getColor() {
-        return color;
+        super(color, "B");
     }
 
     @Override
     boolean canMoveToPosition(ChessBoard chessBoard, int line, int column, int toLine, int toColumn) {
-        // Проверка находится ли конечная точка хода на доске
-        if (!(range(toLine) && range(toColumn))) return false;
-
         //Если цвет фигур совпадают, то хода нет
-        if (chessBoard.board[toLine][toColumn] != null) {
-            if (chessBoard.board[toLine][toColumn].getColor().equals(getColor())) {
-                return false;
-            }
-        }
+        if (checkColor(chessBoard.board, toLine, toColumn)) return false;
 
         //Относительные координаты от начальной точки хода
         int relativeLine = Math.abs(toLine - line);
@@ -43,14 +31,5 @@ public class Bishop extends ChessPiece {
             return true;
         }
         return false;
-    }
-
-    @Override
-    String getSymbol() {
-        return "B";
-    }
-
-    private boolean range(int i) {
-        return (i >= 0) && (i <= 7);
     }
 }

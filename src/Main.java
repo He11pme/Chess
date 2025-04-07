@@ -1,29 +1,3 @@
-//public class Main {
-//    public static ChessBoard buildBoard() {
-//        ChessBoard board = new ChessBoard("Black");
-//        for (int i = 0; i < 8; i++) {
-//            board.board[1][i] = new Pawn("White");
-//            board.board[6][i] = new Pawn("Black");
-//        }
-//
-//        return board;
-//    }
-//
-//    public static void main(String[] args) {
-//
-//        ChessBoard board = buildBoard();
-//        board.printBoard();
-////        if(board.moveToPosition(6, 2, 7, 2)) board.printBoard();
-////        else System.out.println("FALSE");
-////        if(board.moveToPosition(1, 2, 3, 2)) board.printBoard();
-////        else System.out.println("FALSE");
-////        if(board.moveToPosition(6, 3, 5, 3)) board.printBoard();
-////        else System.out.println("FALSE");
-//
-//
-//    }
-//}
-//
 import java.util.Scanner;
 
 public class Main {
@@ -62,12 +36,13 @@ public class Main {
         ChessBoard board = buildBoard();
         Scanner scanner = new Scanner(System.in);
         System.out.println("""
+               Черные фигуры в виду ограничения консоли являются красными.
+               
                Чтобы проверить игру надо вводить команды:
                'exit' - для выхода
                'replay' - для перезапуска игры
                'castling0' или 'castling7' - для рокировки по соответствующей линии
-               'move 1 1 2 3' - для передвижения фигуры с позиции 1 1 на 2 3(поле это двумерный массив от 0 до 7)
-               Проверьте могут ли фигуры ходить друг сквозь друга, корректно ли съедают друг друга, можно ли поставить шах и сделать рокировку?""");
+               'move b2-b4' - для передвижения фигуры с позиции b2 на b4""");
         System.out.println();
         board.printBoard();
         while (true) {
@@ -79,14 +54,14 @@ public class Main {
                 board.printBoard();
             } else {
                 if (s.equals("castling0")) {
-                    if (board.castling0()) {
+                    if (board.castling(0)) {
                         System.out.println("Рокировка удалась");
                         board.printBoard();
                     } else {
                         System.out.println("Рокировка не удалась");
                     }
                 } else if (s.equals("castling7")) {
-                    if (board.castling7()) {
+                    if (board.castling(7)) {
                         System.out.println("Рокировка удалась");
                         board.printBoard();
                     } else {
@@ -95,10 +70,10 @@ public class Main {
                 } else if (s.contains("move")) {
                     String[] a = s.split(" ");
                     try {
-                        int line = Integer.parseInt(a[1]);
-                        int column = Integer.parseInt(a[2]);
-                        int toLine = Integer.parseInt(a[3]);
-                        int toColumn = Integer.parseInt(a[4]);
+                        int line = a[1].charAt(1) - '0' - 1;
+                        int column = letterToLine(a[1].charAt(0));
+                        int toLine = a[1].charAt(4) - '0' - 1;
+                        int toColumn = letterToLine(a[1].charAt(3));
                         if (board.moveToPosition(line, column, toLine, toColumn)) {
                             System.out.println("Успешно передвинулись");
                             board.printBoard();
@@ -110,5 +85,19 @@ public class Main {
                 }
             }
         }
+    }
+
+    private static int letterToLine(char c) {
+        return switch (c) {
+            case 'A', 'a' -> 0;
+            case 'B', 'b' -> 1;
+            case 'C', 'c' -> 2;
+            case 'D', 'd' -> 3;
+            case 'E', 'e' -> 4;
+            case 'F', 'f' -> 5;
+            case 'G', 'g' -> 6;
+            case 'H', 'h' -> 7;
+            default -> -1;
+        };
     }
 }
